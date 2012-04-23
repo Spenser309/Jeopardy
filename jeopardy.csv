@@ -1,0 +1,70 @@
+America(I);100;What building does the President live in?;White House
+America(I);200;Name the previous president of America.;George W. Bush
+America(I);300;How many stripes are there on the flag?;13
+America(I);400;What is the largest state?;Alaska
+America(I);500;When is America's birthday?;4th of July
+America(II);100;What is the capital city?; Washington
+America(II);200;What is the longest river in America?;Mississippi
+America(II);300;Where does the name America come from?;Amerigo Vespucci
+America(II);400;What country is north of America?;Canada
+America(II);500;What does USA stand for?;United States of America
+Japan;100;What is Japan's country's song?;Kimigayo
+Japan;200;What is the biggest lake in Japan?;Lake Biwa
+Japan;300;Who is on 5000 yen?;Ichiyo Higuchi
+Japan;400;When did the Kamakura Bakufu start?;1192
+Japan;500;What is Japan's country's bird?;kiji
+Sports;100;How many members are on a soccer team?;11
+Sports;200;What is Hideo Nomo's uniform number?;16
+Sports;300;In tennis, what is the name of 0 points?;love
+Sports;400;How big is a baseball infield?;90 ft
+Sports;500;Where were the 1984 Olympics?;Los Angeles
+Puzzle(I);100;1, 2, 4, 8, 16, ?; 32
+Puzzle(I);200;Z, Y, X, W, ?;V
+Puzzle(I);300;S, M, T, ?, T, F, S;W
+Puzzle(I);400;O, T, T, F, F, ?;S
+Puzzle(I);500;J, Y, K, A, N, ?, K;H
+Puzzle(II);100;11, 22, 33, 44, 55, ?; 66
+Puzzle(II);200;A, C, E, G, ?;V
+Puzzle(II);300;16,32,64,128,?;256
+Puzzle(II);400;ON, DJ, FM, AM, ?;JJ
+Puzzle(II);500;12, 7, 18, 10, 5, ?, 9, 1, 12, 6;14
+Music;100;Who are the members of Globe?;Keiko, Komuro Tetsuya, Marc Panther
+Music;200;Who sings "Oops I did it again"?;Britney Spears
+Music;300;Who sings "Down on me";50 Cent
+Music;400;How many keys are on a piano?;88
+Music;500;What does SMAP stand for?;Sport Music Assemble People
+Geography;100;What continent is Mexico located in?;North America
+Geography;200;What is the country with most people in the world?; China
+Geography;300;What continent is the country Australia in?; Australia
+Geography;400;What is the capital city of Colombia?;Bogota 
+Geography;500;In km2, what is the surface area of earth?;510,072,000
+Computers;100;Which operating system is the most widely used?;Windows 7
+Computers;200;Name the most commonly used key in a computer keyboard.;Spacebar
+Computers;300;What kind of memory is used by what is commonly referred to as USB Memory Stick?;Flash
+Computers;400;What was the name of the first apple computer to be made?;Apple I
+Computers;500;Which OS is used most commonly, Mac OS 5 or Android?; Android
+Networks;100;Name the physical address given to NIC cards; MAC address
+Networks;200;Number of bits used by the IPv4 protocol to address nodes.;32
+Networks;300;Name the fourth layer of the TCP/IP model;Transport
+Networks;400;Number of base in which IPv6 addresses are represented;16
+Networks;500;What is the transport media for transoceanic connections in the internet;Optic fiber
+Network Security;100;What operation does one apply on a message to send it securely?;Encryption
+Network Security;200;What operation does one apply on a message when received securely?;Decryption
+Network Security;300;What kind of key algorithm is used by SSL?;Public Key
+Network Security;400;What kinds of algorithms are commonly used to store passwords?;Hash
+Network Security;500;What is another name for hash?; Message Digest
+Conversions;100;How many centimeters has a meter?;100
+Conversions;200;How many centimeters are there in an inch?;2.54
+Conversions;300;How many kilometers make a mile?; 1.6
+Conversions;400;At what point is ºF= ºC?;-40
+Conversions;500;How many Kelvins make 0ºC?;273.15
+Disney Characters;100;Which Disney character is a mouse?;Mickey Mouse
+Disney Characters;200;How many dwarfs are there in Snow White?;7
+Disney Characters;300;Captain Hook is the antagonist for which Disney movie?;Peter pan
+Disney Characters;400;What is the name of the antagonist in Aladdin?;Jafar
+Disney Characters;500;Who makes the voice for the genie in Aladdin?;Robin Williams
+Nutrition;100;Which of the following is a protein? Bread, Milk, Chicken;Chicken
+Nutrition;200;Healthiest way to eat meat? Grilled, Fried, Teryaki; Grilled
+Nutrition;300;Is fiber a carbohydrate (true/false)?;True
+Nutrition;400;Minerals are an important part of…;Fruits and vegetables
+Nutrition;500;Unit used to represent the amount of energy contained food.;Calorie
