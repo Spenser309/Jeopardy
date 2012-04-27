@@ -3,7 +3,7 @@ America(I);200;Name the previous president of America.;George W. Bush
 America(I);300;How many stripes are there on the flag?;13
 America(I);400;What is the largest state?;Alaska
 America(I);500;When is America's birthday?;4th of July
-America(II);100;What is the capital city?; Washington
+America(II);100;What is the capital city?;Washington
 America(II);200;What is the longest river in America?;Mississippi
 America(II);300;Where does the name America come from?;Amerigo Vespucci
 America(II);400;What country is north of America?;Canada
@@ -18,12 +18,17 @@ Sports;200;What is Hideo Nomo's uniform number?;16
 Sports;300;In tennis, what is the name of 0 points?;love
 Sports;400;How big is a baseball infield?;90 ft
 Sports;500;Where were the 1984 Olympics?;Los Angeles
-Puzzle(I);100;1, 2, 4, 8, 16, ?; 32
+Sports(II);100;Who was the last soccer world champion?;Spain
+Sports(II);200;Who was responsible for beating Marquez in boxing in the year 2011;Manny Pacquiao
+Sports(II);300;Who has the NBA's youngest MVP record?;Derrick Rose
+Sports(II);400;Name the only player in the spanish league to receive the price of most goals scored in a season 5 times;Hugo Sanchez
+Sports(II);500;What was the name of the player Zinedine Zidane hit with his head on his last world cup match?;Marco Materazzi
+Puzzle(I);100;1, 2, 4, 8, 16, ?;32
 Puzzle(I);200;Z, Y, X, W, ?;V
 Puzzle(I);300;S, M, T, ?, T, F, S;W
 Puzzle(I);400;O, T, T, F, F, ?;S
 Puzzle(I);500;J, Y, K, A, N, ?, K;H
-Puzzle(II);100;11, 22, 33, 44, 55, ?; 66
+Puzzle(II);100;11, 22, 33, 44, 55, ?;66
 Puzzle(II);200;A, C, E, G, ?;V
 Puzzle(II);300;16,32,64,128,?;256
 Puzzle(II);400;ON, DJ, FM, AM, ?;JJ
@@ -34,16 +39,16 @@ Music;300;Who sings "Down on me";50 Cent
 Music;400;How many keys are on a piano?;88
 Music;500;What does SMAP stand for?;Sport Music Assemble People
 Geography;100;What continent is Mexico located in?;North America
-Geography;200;What is the country with most people in the world?; China
-Geography;300;What continent is the country Australia in?; Australia
+Geography;200;What is the country with most people in the world?;China
+Geography;300;What continent is the country Australia in?;Australia
 Geography;400;What is the capital city of Colombia?;Bogota 
 Geography;500;In km2, what is the surface area of earth?;510,072,000
 Computers;100;Which operating system is the most widely used?;Windows 7
 Computers;200;Name the most commonly used key in a computer keyboard.;Spacebar
 Computers;300;What kind of memory is used by what is commonly referred to as USB Memory Stick?;Flash
 Computers;400;What was the name of the first apple computer to be made?;Apple I
-Computers;500;Which OS is used most commonly, Mac OS 5 or Android?; Android
-Networks;100;Name the physical address given to NIC cards; MAC address
+Computers;500;Which OS is used most commonly, Mac OS 5 or Android?;Android
+Networks;100;Name the physical address given to NIC cards;MAC address
 Networks;200;Number of bits used by the IPv4 protocol to address nodes.;32
 Networks;300;Name the fourth layer of the TCP/IP model;Transport
 Networks;400;Number of base in which IPv6 addresses are represented;16
@@ -52,19 +57,44 @@ Network Security;100;What operation does one apply on a message to send it secur
 Network Security;200;What operation does one apply on a message when received securely?;Decryption
 Network Security;300;What kind of key algorithm is used by SSL?;Public Key
 Network Security;400;What kinds of algorithms are commonly used to store passwords?;Hash
-Network Security;500;What is another name for hash?; Message Digest
+Network Security;500;What is another name for hash?;Message Digest
 Conversions;100;How many centimeters has a meter?;100
 Conversions;200;How many centimeters are there in an inch?;2.54
-Conversions;300;How many kilometers make a mile?; 1.6
-Conversions;400;At what point is ¼F= ¼C?;-40
-Conversions;500;How many Kelvins make 0¼C?;273.15
+Conversions;300;How many kilometers make a mile?;1.6
+Conversions;400;At what point is Â¼F= Â¼C?;-40
+Conversions;500;How many Kelvins make 0Â¼C?;273.15
 Disney Characters;100;Which Disney character is a mouse?;Mickey Mouse
 Disney Characters;200;How many dwarfs are there in Snow White?;7
 Disney Characters;300;Captain Hook is the antagonist for which Disney movie?;Peter pan
 Disney Characters;400;What is the name of the antagonist in Aladdin?;Jafar
 Disney Characters;500;Who makes the voice for the genie in Aladdin?;Robin Williams
 Nutrition;100;Which of the following is a protein? Bread, Milk, Chicken;Chicken
-Nutrition;200;Healthiest way to eat meat? Grilled, Fried, Teryaki; Grilled
+Nutrition;200;Healthiest way to eat meat? Grilled, Fried, Teryaki;Grilled
 Nutrition;300;Is fiber a carbohydrate (true/false)?;True
-Nutrition;400;Minerals are an important part ofÉ;Fruits and vegetables
+Nutrition;400;Minerals are an important part ofÃ‰;Fruits and vegetables
 Nutrition;500;Unit used to represent the amount of energy contained food.;Calorie
+Movies;100;What is the name of the actor who plays Jack Sparrow in Pirates of the Caribbean?;Johnny Depp
+Movies;200;What is the name if the actress who plays Hermione in Harry Potter;Emma Watson
+Movies;300;Director of the movie Avatar;James Cameron
+Movies;400;Who is the songwriter of the movie Inception?;Hans Zimmer
+Movies;500;Who is the director of the movie The Proposal?;Anne Fletcher
+Social Networks;100;What is the biggest social network in the world?;Facebook
+Social Networks;200;What is the name of the founder and CEO of Facebook?;Mark Zuckerberg
+Social Networks;300;What is the most popular social network used to communicate with celebrities?;Twitter
+Social Networks;400;What is the name of the founder of Twitter?;Jack Dorsey
+Social Networks;500;What is the name of google's social network?;Google+
+Presidents;100;Name the first president of the United States;George Washington
+Presidents;200;Name the dictator of Cuba.;Fidel Castro 
+Presidents;300;Name the current president of France.;Nicolas Sarkozy
+Presidents;400;Name the first PAN president of Mexico.;Vicente Fox
+Presidents;500;Name the current president of South Africa;Jacob Zuma
+Quotes;100;Who said the quote: "All I know is that I know nothing."?;Socrates
+Quotes;200;What movie is the following quote from: "My name is lieutenant Aldo Raine, and I'm putting together a special teamÃ‰"?;Inglorious Basterds
+Quotes;300;What movie is the following quote from: "Vote for Pedro"?;Napoleon Dynamite
+Quotes;400;Who said the following quote: "Glory is fleeting, but obscurity is forever";Napoleon Bonaparte
+Quotes;500;Who said the following quote: "Respect to other's people's rights means peace"?;Benito Juarez
+Olympic Records;100;Who has the 100 meters olympic record?;Usian Bolt
+Olympic Records;200;Who has the marathon onlympic record?;Noah Ngeny
+Olympic Records;300;Who has the long jump olympic record?;Bob Beamon
+Olympic Records;400;Who has the decathlon olympic record?;Roman Serble
+Olympic Records;500;Who has the pole vault olympic record?;Steven Hooker

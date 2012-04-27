@@ -2,8 +2,8 @@
  ============================================================================
  Name        : jeopardy.c
  Author      : Spenser Gilliland <spenser@gillilanding.com>
- Version     :
- Copyright   : GPLv3
+ Version     : v0.1
+ Copyright   : N/A
  Description : Jeopardy over TCP/IP
  ============================================================================
  */
@@ -25,33 +25,28 @@ static short int portno = 22000;
 static short int max_conns = 5;
 
 char yesorno() {
+	char line[2];
 	char answer;
-
-	answer = getchar();
-	getchar(); /* Remove the trailing \n */
+	ngetline(line, 2, stdin);
+	sscanf(line,"%c", &answer);
 	while(answer != 'y' && answer != 'n') {
 		printf("Please type y or n\n");
-		answer = getchar();
-		getchar(); /* Remove the trailing \n */
+		ngetline(line, 2, stdin);
+		sscanf(line,"%c", &answer);
 	}
 
 	return answer;
 }
 
-int jeo_get_player_name(char** name, FILE* read, FILE* write) {
-
-	return 0;
-}
-
-int* jeo_master_setup() {
-	char answer;
-	int sockfd, n;
+int jeo_master_setup(FILE*** cli_sockfps, int** cli_sockfds) {
+	int sockfd;
 	struct sockaddr_in addr, cli_addr;
 	socklen_t cli_addr_size = sizeof(cli_addr);
 	int num_players = 0;
 	int done = 0;
 	char buffer[255];
-	int *cli_sockfd = malloc(sizeof(int) * max_conns);
+	*cli_sockfds = malloc(sizeof(int) * max_conns);
+	*cli_sockfps = malloc(sizeof(FILE*) * max_conns);
 
 	/* Build TCP server socket accessible on all IPs of localhost */
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -74,26 +69,29 @@ int* jeo_master_setup() {
 	printf("Listening for Players\n");
 
 	do {
-		cli_sockfd[num_players] = accept(sockfd, (struct sockaddr *) &cli_addr, &cli_addr_size);
-		if(cli_sockfd[num_players] < 0) {
+		(*cli_sockfds)[num_players] = accept(sockfd, (struct sockaddr *) &cli_addr, &cli_addr_size);
+
+		if((*cli_sockfds)[num_players] < 0) {
 			perror("WARNING: Could not accept connection lets try the next one");
 			usleep(100000); /* Probably Something bad happened wait a bit see if it fixes itself */
 			continue;
 		}
 		printf("Accepting connection from %s\n", inet_ntoa(cli_addr.sin_addr));
 
-		/* Get Player Name */
-		n = read(cli_sockfd[num_players], buffer, 255);
-		if (n < 0) {
-			perror("ERROR: Cannot read startup message");
+		if(((*cli_sockfps)[num_players] = fdopen((*cli_sockfds)[num_players], "rw")) == NULL) {
+			perror("ERROR: Could not turn socket into fp");
 			exit(EXIT_FAILURE);
 		}
+
+		/* Get Player Name */
+		ngetline(buffer, 255,(*cli_sockfps)[num_players]);
 
 		printf("Would you like to play with %s? (y/n) ", buffer);
 		if(yesorno() == 'y') {
 			num_players++; /* Add player */
 		} else {
-			close(cli_sockfd[num_players]); /* Close Connection */
+			fclose((*cli_sockfps)[num_players]);
+			close((*cli_sockfds)[num_players]); /* Close Connection */
 		}
 
 		if (num_players == max_conns) {
@@ -101,38 +99,129 @@ int* jeo_master_setup() {
 			done = 1;
 		} else {
 			printf("Would you like to start the game? (y/n) ");
-			answer = yesorno();
-
-			if(answer == 'y')
+			if(yesorno() == 'y')
 				done = 1;
 		}
 	} while(done == 0);
 	close(sockfd);
 
-	return cli_sockfd;
+	printf("Game Starting\n");
+	return num_players;
 }
 
 
-int* jeo_master(char* name) {
-	int* clients;
 
-	printf("Starting Jeopardy master\n");
+void jeo_master(char* name, char* db_filename) {
+	int i;
 
-	clients = jeo_master_setup();
+	/* From the DB */
+	struct jeo_entry* db = NULL; /* Each line in the db is represented by an jeo_entry */
+	struct jeo_cat* cats = NULL; /* Each category from the db is represented by a jeo_cat */
+	struct jeo_board board; /* A game board */
+	int dsize = 0; /* Number of entries */
+	int csize = 0; /* Number of categories */
 
-	return clients;
+	/* From the Network */
+	int* clientfns;
+	FILE** clientfps;
+	int num_clients;
+
+    /* Game Play */
+	int x,y; /* Coordinate of Question to answer */
+	int leader, player; /* current leader and current player */
+	int round, question;
+	int played;
+	int *points;
+	int done = 0;
+
+	printf("Loading Question DB");
+	dsize = jeo_load_db(&db, db_filename);
+	if(dsize < 0) {
+		printf("ERROR: Could not load Question DB\n");
+		exit(EXIT_FAILURE);
+	}
+	printf("...");
+	csize = jeo_load_cats(&cats, db, dsize);
+	if(csize < 0) {
+		printf("ERROR: Could not determine categories\n");
+		exit(EXIT_FAILURE);
+	}
+	printf("...done\n");
+
+	printf("Starting Network Server\n");
+
+	num_clients = jeo_master_setup(&clientfps, &clientfns);
+
+	points = calloc(sizeof(int), num_clients+1);
+
+	printf("Let's Play Jeopardy!!!\n");
+
+	for(round = 0; round < 3; round++) {
+		printf("Start of Round %i\n", round);
+		jeo_build_board(&board, cats, csize);
+
+		jeo_send_board(board, clientfps, num_clients);
+
+		leader = 0;
+		for(question = 0; question < 30; question++) {
+			played = 0;
+
+			jeo_print_board(board);
+			jeo_select_question(&board, leader, &x, &y, clientfps);
+			jeo_print_question(board, x, y, clientfps, num_clients);
+
+			do {
+				player = jeo_get_beep(clientfps, num_clients, played);
+
+				if(player == -1) { /* Skip Question */
+					printf("The answer was %s\n", board.categories[x].questions[y].answer);
+					done = 1;
+				} else {
+
+					SET_BIT(played,player);
+
+					if (jeo_check_answer(board, player, x, y, clientfps) == 0) {
+						leader = player;
+						points[player] += (y+1)*100;
+						printf("Player %i: gave a correct answer his score has been increased to %i\n", player, points[player]);
+						done = 1;
+					} else {
+						points[player] -= (y+1)*100;
+						printf("Player %i: gave an incorrect answer his score has been lowered to %i\n", player, points[player]);
+					}
+				}
+				jeo_print_status(clientfps, player,done, points, num_clients+1);
+			} while(done == 0);
+		}
+		leader = jeo_round_winner(points,num_clients+1);
+		if (round < 2) {
+			printf("\n\nThe leader of round %i was player %i; Player %i start us off for round %i.\n", round, leader, leader, round+1);
+		}
+	}
+
+	printf("\n\nThe winner is Player %i\n",jeo_round_winner(points,num_clients+1));
+
+	printf("GAME OVER\n");
+
+	for(i = 0; i < num_clients; i++) {
+		fclose(clientfps[i]);
+		close(clientfns[i]);
+	}
+	free(clientfps);
+	free(clientfns);
+	jeo_free_cats(&cats, csize);
+	jeo_free_db(&db, dsize);
+
+	free(points);
 }
 
 int jeo_client_ident(char* name, int sockfd) {
 	FILE* w_conn = fdopen(sockfd, "w");
-	/*FILE* r_conn = fdopen(sockfd, "r"); */
 
 	if(fprintf(w_conn, "%s", name) < 0) {
 		perror("ERROR: Could not write to socket\n");
 		exit(EXIT_FAILURE);
 	}
-
-
 
 	return 0;
 }
@@ -158,10 +247,8 @@ int jeo_client_connect(char* name, struct hostent *master) {
 	return sockfd;
 }
 
-
 int jeo_client(char* name, struct hostent *master) {
 	int sockfd;
-	int i;
 
 	printf("Starting jeopardy client %s\n", master->h_name);
 	sockfd = jeo_client_connect(name, master);
@@ -169,24 +256,6 @@ int jeo_client(char* name, struct hostent *master) {
 	if(!jeo_client_ident(name,sockfd) != 0) {
 		printf("He doesn't want to play with you.\n");
 		exit(EXIT_FAILURE);
-	}
-
-	/* Rounds */
-	for(i = 0;i < 3; i++) {
-
-		/* Receive Board*/
-		/* jeo_client_get_board(int sockfd) != 0) {
-			printf("ERROR: Could not receive board");
-			exit(EXIT_FAILURE);
-		} */
-
-		/*if (jeo_client_get_board(int sockfd) != 0) {
-			jeo_client_choose_question(int sockfd);
-		}*/
-
-		/* Need to change to non-blocking, poll the file descriptor */
-		/* Check if a response is received */
-		/*jeo_client_bell(int sockfd); */
 	}
 
 	close(sockfd);
@@ -197,22 +266,22 @@ int main(int argc, char *argv[]) {
 
 	struct hostent *master;
 
-	if(argc < 2) {
-		printf("usage: %s <name> [<address>]\n", argv[0]);
+	if(argc < 3) {
+		printf("usage: %s [-c] <name> [<address>]\n", argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
-	if(argc < 3 ) {
-		jeo_master(argv[1]);
+	if(argc < 4 ) {
+		jeo_master(argv[1], argv[2]);
 	}
 	else {
 		sleep(1);
-		master = gethostbyname(argv[2]);
+		master = gethostbyname(argv[3]);
 		if (master == NULL) {
 			printf("ERROR: Invalid hostname\n");
 			exit(EXIT_FAILURE);
 		}
-		jeo_client(argv[1], master);
+		jeo_client(argv[2], master);
 	}
 	return 0;
 }
