@@ -52,13 +52,14 @@ struct jeo_player {
 	int pts;
 };
 
-int jeo_get_beep(FILE** clients, int num_clients, int played);
-void jeo_print_question(struct jeo_board board, int x, int y, FILE** clients, int num_clients);
-void jeo_select_question(struct jeo_board* board, int player, int* x, int* y, FILE** clients);
-int jeo_check_answer(struct jeo_board board, int player, int x, int y, FILE** clients);
-void jeo_print_status(FILE** clients, int player, int win, int* points, int num_players);
+int jeo_get_beep(int* clients, int num_clients, int played);
+void jeo_notify_clients(int player, int* clients, int num_clients);
+void jeo_print_question(struct jeo_board board, int x, int y, int* clients, int num_clients);
+void jeo_select_question(struct jeo_board* board, int player, int* x, int* y, int* clients);
+int jeo_check_answer(struct jeo_board board, int player, int x, int y, int* clients);
+void jeo_print_status(int* clients, int player, int win, int* points, int num_players);
 void jeo_print_board(struct jeo_board board);
-void jeo_send_board(struct jeo_board board, FILE** clients, int num_clients);
+void jeo_send_board(struct jeo_board board, int* clients, int num_clients);
 int jeo_load_db(struct jeo_entry** db, char* filename);
 int jeo_load_cats(struct jeo_cat** cats, struct jeo_entry* db, int size);
 int jeo_build_board(struct jeo_board* board, struct jeo_cat* cats, int size);
@@ -66,5 +67,6 @@ void jeo_free_db(struct jeo_entry** db, int size);
 void jeo_free_cats(struct jeo_cat** cats, int size);
 int jeo_round_winner(int points[], int num_players);
 int ngetline (char *buf, size_t size, FILE* file);
+int fngetline (char *buf, size_t size, int file);
 
 #endif /* JEOPARDY_H_ */

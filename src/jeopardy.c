@@ -21,7 +21,7 @@
 
 #include "jeopardy.h"
 
-static short int portno = 22000;
+static short int portno = 1417;
 static short int max_conns = 5;
 
 char yesorno() {
@@ -38,15 +38,14 @@ char yesorno() {
 	return answer;
 }
 
-int jeo_master_setup(FILE*** cli_sockfps, int** cli_sockfds) {
+int jeo_master_setup(int** cli_sockfds) {
 	int sockfd;
 	struct sockaddr_in addr, cli_addr;
 	socklen_t cli_addr_size = sizeof(cli_addr);
-	int num_players = 0;
+	int num_clients = 0;
 	int done = 0;
 	char buffer[255];
 	*cli_sockfds = malloc(sizeof(int) * max_conns);
-	*cli_sockfps = malloc(sizeof(FILE*) * max_conns);
 
 	/* Build TCP server socket accessible on all IPs of localhost */
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -55,9 +54,9 @@ int jeo_master_setup(FILE*** cli_sockfps, int** cli_sockfds) {
 	addr.sin_port = htons(portno);
 
 	/* Bind to the socket */
-	if ( bind(sockfd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
+	while ( bind(sockfd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
 		perror("ERROR: Binding to socket");
-		exit(EXIT_FAILURE);
+		sleep(5); /* Probably Something bad happened wait a bit see if it fixes itself */
 	}
 
 	/* Start listening for connection attempts */
@@ -69,32 +68,26 @@ int jeo_master_setup(FILE*** cli_sockfps, int** cli_sockfds) {
 	printf("Listening for Players\n");
 
 	do {
-		(*cli_sockfds)[num_players] = accept(sockfd, (struct sockaddr *) &cli_addr, &cli_addr_size);
+		(*cli_sockfds)[num_clients] = accept(sockfd, (struct sockaddr *) &cli_addr, &cli_addr_size);
 
-		if((*cli_sockfds)[num_players] < 0) {
+		if((*cli_sockfds)[num_clients] < 0) {
 			perror("WARNING: Could not accept connection lets try the next one");
 			usleep(100000); /* Probably Something bad happened wait a bit see if it fixes itself */
 			continue;
 		}
 		printf("Accepting connection from %s\n", inet_ntoa(cli_addr.sin_addr));
 
-		if(((*cli_sockfps)[num_players] = fdopen((*cli_sockfds)[num_players], "rw")) == NULL) {
-			perror("ERROR: Could not turn socket into fp");
-			exit(EXIT_FAILURE);
-		}
-
 		/* Get Player Name */
-		ngetline(buffer, 255,(*cli_sockfps)[num_players]);
+		fngetline(buffer, 255,(*cli_sockfds)[num_clients]);
 
 		printf("Would you like to play with %s? (y/n) ", buffer);
 		if(yesorno() == 'y') {
-			num_players++; /* Add player */
+			num_clients++; /* Add player */
 		} else {
-			fclose((*cli_sockfps)[num_players]);
-			close((*cli_sockfds)[num_players]); /* Close Connection */
+			close((*cli_sockfds)[num_clients]); /* Close Connection */
 		}
 
-		if (num_players == max_conns) {
+		if (num_clients == max_conns) {
 			printf("Maximum number of players added to game starting...\n");
 			done = 1;
 		} else {
@@ -106,7 +99,7 @@ int jeo_master_setup(FILE*** cli_sockfps, int** cli_sockfds) {
 	close(sockfd);
 
 	printf("Game Starting\n");
-	return num_players;
+	return num_clients;
 }
 
 
@@ -123,7 +116,6 @@ void jeo_master(char* name, char* db_filename) {
 
 	/* From the Network */
 	int* clientfns;
-	FILE** clientfps;
 	int num_clients;
 
     /* Game Play */
@@ -143,14 +135,14 @@ void jeo_master(char* name, char* db_filename) {
 	printf("...");
 	csize = jeo_load_cats(&cats, db, dsize);
 	if(csize < 0) {
-		printf("ERROR: Could not determine categories\n");
+		printf("\nERROR: Could not determine categories\n");
 		exit(EXIT_FAILURE);
 	}
 	printf("...done\n");
 
 	printf("Starting Network Server\n");
 
-	num_clients = jeo_master_setup(&clientfps, &clientfns);
+	num_clients = jeo_master_setup(&clientfns);
 
 	points = calloc(sizeof(int), num_clients+1);
 
@@ -159,19 +151,24 @@ void jeo_master(char* name, char* db_filename) {
 	for(round = 0; round < 3; round++) {
 		printf("Start of Round %i\n", round);
 		jeo_build_board(&board, cats, csize);
-
-		jeo_send_board(board, clientfps, num_clients);
+		printf("Sending board to %i clients\n", num_clients);
+		jeo_send_board(board, clientfns, num_clients);
 
 		leader = 0;
 		for(question = 0; question < 30; question++) {
 			played = 0;
 
 			jeo_print_board(board);
-			jeo_select_question(&board, leader, &x, &y, clientfps);
-			jeo_print_question(board, x, y, clientfps, num_clients);
+			jeo_select_question(&board, leader, &x, &y, clientfns);
+			jeo_print_question(board, x, y, clientfns, num_clients);
 
 			do {
-				player = jeo_get_beep(clientfps, num_clients, played);
+				for(i = 0; i < num_clients+1; i++) {
+					if(CHECK_BIT(played,i) == 1) printf("Players %i out\n", i);
+				}
+				player = jeo_get_beep(clientfns, num_clients, played);
+
+				jeo_notify_clients(player, clientfns, num_clients);
 
 				if(player == -1) { /* Skip Question */
 					printf("The answer was %s\n", board.categories[x].questions[y].answer);
@@ -180,7 +177,7 @@ void jeo_master(char* name, char* db_filename) {
 
 					SET_BIT(played,player);
 
-					if (jeo_check_answer(board, player, x, y, clientfps) == 0) {
+					if (jeo_check_answer(board, player, x, y, clientfns) == 0) {
 						leader = player;
 						points[player] += (y+1)*100;
 						printf("Player %i: gave a correct answer his score has been increased to %i\n", player, points[player]);
@@ -188,9 +185,10 @@ void jeo_master(char* name, char* db_filename) {
 					} else {
 						points[player] -= (y+1)*100;
 						printf("Player %i: gave an incorrect answer his score has been lowered to %i\n", player, points[player]);
+						done = 0;
 					}
 				}
-				jeo_print_status(clientfps, player,done, points, num_clients+1);
+				jeo_print_status(clientfns, player,done, points, num_clients+1);
 			} while(done == 0);
 		}
 		leader = jeo_round_winner(points,num_clients+1);
@@ -204,10 +202,8 @@ void jeo_master(char* name, char* db_filename) {
 	printf("GAME OVER\n");
 
 	for(i = 0; i < num_clients; i++) {
-		fclose(clientfps[i]);
 		close(clientfns[i]);
 	}
-	free(clientfps);
 	free(clientfns);
 	jeo_free_cats(&cats, csize);
 	jeo_free_db(&db, dsize);
@@ -217,11 +213,22 @@ void jeo_master(char* name, char* db_filename) {
 
 int jeo_client_ident(char* name, int sockfd) {
 	FILE* w_conn = fdopen(sockfd, "w");
+	FILE* r_conn = fdopen(sockfd, "r");
+	char buffer[255];
 
-	if(fprintf(w_conn, "%s", name) < 0) {
+	if(w_conn == NULL || r_conn == NULL) {
+		perror("ERROR: Opening socket fd\n");
+		exit(EXIT_FAILURE);
+	}
+	if(fprintf(w_conn, "%s\n", name) < 0) {
 		perror("ERROR: Could not write to socket\n");
 		exit(EXIT_FAILURE);
 	}
+	fflush(w_conn);
+	printf("Waiting for categories\n");
+	ngetline(buffer, 255, r_conn);
+	printf("%s",buffer);
+	printf("...done\n");
 
 	return 0;
 }
@@ -244,6 +251,7 @@ int jeo_client_connect(char* name, struct hostent *master) {
 		perror("ERROR: Connection refused");
 		return -ENOCONN;
 	}
+
 	return sockfd;
 }
 
