@@ -216,10 +216,9 @@ int jeo_get_beep(int* clients, int num_clients, int played) {
 			}
 			for(i = 0; i < num_clients; i++) {
 				if(FD_ISSET(clients[i], &rfds)) {
-						rdbytes = read(clients[i], beepbuf, 5*sizeof(char));
-						beepbuf[4] = '\0';
+						rdbytes = fngetline(beepbuf, 5*sizeof(char), clients[i]);
 						printf("client wrote %i bytes: %s\n", rdbytes, beepbuf);
-						if (rdbytes == 5 && strcmp(beepbuf, key) == 0) {
+						if (strcmp(beepbuf, key) == 0) {
 							printf("%i ",i);
 							winners[i+1] = 1;
 							winner++;
